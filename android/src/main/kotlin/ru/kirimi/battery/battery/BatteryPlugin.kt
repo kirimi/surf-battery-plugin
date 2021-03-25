@@ -1,5 +1,7 @@
 package ru.kirimi.battery.battery
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
@@ -16,13 +18,17 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 
 /** BatteryPlugin */
 class BatteryPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
-  /// The MethodChannel that will the communication between Flutter and native Android
-  ///
-  /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-  /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
 
   private lateinit var binding : ActivityPluginBinding
+
+  /// Ресивер, который вызывается при изменении уровня батареи Intent.ACTION_BATTERY_CHANGED
+  private  var  batReceiver : BroadcastReceiver = object : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent?) {
+      val  batteryLevel : Int = getBatteryLevel();
+      channel.invokeMethod("change_battery", batteryLevel);
+    }
+  }
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "battery")
@@ -33,7 +39,6 @@ class BatteryPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     if (call.method == "get_battery") {
       val  batteryLevel : Int = getBatteryLevel();
       result.success(batteryLevel)
-      channel.invokeMethod("change_battery", batteryLevel);
     } else {
       result.notImplemented()
     }
@@ -59,6 +64,8 @@ class BatteryPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
     this.binding = binding
+    binding.activity.registerReceiver(this.batReceiver,
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED));
   }
 
   override fun onDetachedFromActivity() {

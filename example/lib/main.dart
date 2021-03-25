@@ -19,7 +19,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     batteryManager = Battery(onBatteryChange: _onBatteryChange);
-    batteryManager.getBatteryLevel();
   }
 
   /// Вызывается при получении уровня заряда батареи с платформы
