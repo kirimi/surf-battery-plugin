@@ -39,7 +39,10 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Battery level: $_batteryLevel'),
+              Text(
+                'Battery level: $_batteryLevel',
+                style: Theme.of(context).textTheme.headline3,
+              ),
               ElevatedButton(
                 onPressed: () => batteryManager.getBatteryLevel(),
                 child: Text('Update battery'),
