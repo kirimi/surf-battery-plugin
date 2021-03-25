@@ -9,7 +9,7 @@ void main() {
 
   setUp(() {
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      return '42';
+      return 42;
     });
   });
 
@@ -17,7 +17,8 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 
-  test('getPlatformVersion', () async {
-    expect(await Battery.platformVersion, '42');
+  test('getBatteryLevel', () async {
+    final battery = Battery(onBatteryChange: (value) {});
+    expect(await battery.getBatteryLevel(), 42);
   });
 }

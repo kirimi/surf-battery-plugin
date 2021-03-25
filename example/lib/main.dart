@@ -1,44 +1,31 @@
-import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:battery/battery.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   runApp(MyApp());
 }
 
+/// Пример использования плагина получения уровня заряда батареи
 class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  int _batteryLevel = 0;
+  Battery batteryManager;
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    batteryManager = Battery(onBatteryChange: _onBatteryChange);
+    batteryManager.getBatteryLevel();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      platformVersion = await Battery.platformVersion;
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
+  /// Вызывается при получении уровня заряда батареи с платформы
+  void _onBatteryChange(int value) {
     setState(() {
-      _platformVersion = platformVersion;
+      _batteryLevel = value;
     });
   }
 
@@ -50,7 +37,16 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Battery level: $_batteryLevel'),
+              ElevatedButton(
+                onPressed: () => batteryManager.getBatteryLevel(),
+                child: Text('Update battery'),
+              )
+            ],
+          ),
         ),
       ),
     );
